@@ -1,21 +1,11 @@
------------------------------------------------------------------------------------------
---
--- main.lua
---
------------------------------------------------------------------------------------------
+display.setStatusBar(display.HiddenStatusBar)
 
--- Your code here
-
-
-local numColumns = 4
-local numRows = 3
-local marginBottom = 2
-local marginLeft = 3
+local numColumns, numRows, marginBottom, marginLeft = 4 , 3 , 2 , 3
 local tileW = display.contentWidth / numColumns - marginLeft
 local tileH = display.contentHeight / numRows - marginBottom
 
-local function createTile(posX,posY,isBlack)
-	local tile = display.newRect(posX,posY,tileW,tileH)
+local function createTile(isBlack)
+	local tile = display.newRect(1,0,tileW,tileH)
 	tile.anchorX = 0
 	tile.anchorY = 0
 
@@ -26,49 +16,53 @@ local function createTile(posX,posY,isBlack)
 	return tile
 end
 
+
+local tPrevious = system.getTimer()
 function moveGroup(target)
 	local group = target
-	group.y = group.y + 7
+	local tDelta = ( system.getTimer() - tPrevious ) * 0.0001
+	group:translate( group.x , tDelta)
 
 	if (group.y >= display.contentHeight) then
 		display.remove(group)
 		Runtime:removeEventListener("enterFrame",group)
-
 		group = createGroup(- tileH - marginBottom)
 	end
 end
 
-local tile = createTile(1,1,0)
--- local tile2 = createTile(tile.x + tileW + marginLeft,1,1)
--- local tile3 = createTile(tile2.x + tileW + marginLeft,1,0)
--- local tile4 = createTile(tile3.x + tileW + marginLeft,1,0)
-
 function createGroup(posY)
-	local tileGroup = display.newGroup()
-	tileGroup:insert(tile)
-	tileGroup[1].y = 100
+	-- Faz o sort da posição da tecla preta
+	local posBlackTile = math.random(1,4)
 
+	local group = display.newGroup()
+	local posLastTile , isFirst = 1 , true
 
+	for j = 1, 4 do
+		local isBlack = 0
+		if ( j == posBlackTile ) then
+			isBlack = 1
+		end
 
-	tileGroup.enterFrame = moveGroup
-	-- Runtime:addEventListener("enterFrame",tileGroup)
-	return tileGroup
+		local tile = createTile(isBlack)
+		if ( isFirst == true ) then
+			tile.x = 1
+			isFirst = false
+		else
+			tile.x = posLastTile + tileW + marginLeft
+		end
+
+		posLastTile = tile.x
+		group:insert(tile)
+	end
+
+	group.y = posY
+	group.enterFrame = moveGroup
+	Runtime:addEventListener("enterFrame",group)
+	return group
 end
 
-
-
-local group = createGroup(0)
-tile.y = 300
--- Runtime:addEventListener("enterFrame",group)
--- local group2 = createGroup(group.y - tileH - marginBottom)
--- local group3 = createGroup(group2.y - tileH - marginBottom)
--- local group4 = createGroup(group3.y - tileH - marginBottom)
-
--- Runtime:addEventListener("enterFrame",group3)
--- Runtime:addEventListener("enterFrame",group4)
--- local group2 = createGroup()
--- local group3 = createGroup()
--- group2.y = group.y + tileH + marginBottom
--- group3.y = group2.y + tileH + marginBottom
-
--- group3[1]:toBack()
+-- Cria os grupos
+local posGroup = - tileH - marginBottom
+for j = 0, 3, 1 do
+	createGroup(j * posGroup)
+end
