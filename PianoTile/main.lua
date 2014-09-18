@@ -7,66 +7,68 @@
 -- Your code here
 
 
+local numColumns = 4
+local numRows = 3
+local marginBottom = 2
+local marginLeft = 3
+local tileW = display.contentWidth / numColumns - marginLeft
+local tileH = display.contentHeight / numRows - marginBottom
 
-display.setStatusBar(display.HiddenStatusBar)
-local marginW = 2
-local tileWSize = display.contentWidth / 4 - marginW
-local tileHSize = display.contentHeight / 3
-
-print(display.contentWidth)
-print(tileWSize)
-
-local function createTile(positionX,positionY,isBlack)
-	local tile = display.newRect(positionX,positionY,tileWSize,tileHSize)
+local function createTile(posX,posY,isBlack)
+	local tile = display.newRect(posX,posY,tileW,tileH)
 	tile.anchorX = 0
+	tile.anchorY = 0
+
 	if (isBlack > 0) then
 		tile:setFillColor(0)
-	else
-		tile:setFillColor(1,5,5)
 	end
 
 	return tile
 end
 
-local numTiles = 0
-local function moveTiles(target)
-	local tileGroup = target
-	tileGroup.y = tileGroup.y + 3
+function moveGroup(target)
+	local group = target
+	group.y = group.y + 7
 
-	if (tileGroup.y - tileHSize > display.contentHeight) then
-		numTiles = numTiles - 1
-		Runtime:removeEventListener("enterFrame",tileGroup)
-		tileGroup:remove()
-	elseif (tileGroup.y > tileHSize and numTiles < 3) then
-		newGroup = createTileGroup()
-		numTiles = numTiles + 1
-		Runtime:addEventListener("enterFrame",newGroup)
+	if (group.y >= display.contentHeight) then
+		display.remove(group)
+		Runtime:removeEventListener("enterFrame",group)
+
+		group = createGroup(- tileH - marginBottom)
 	end
-
 end
 
-function createTileGroup()
-	local tile1 = createTile(2,-tileHSize-10,0)
-	local tile2 = createTile(tileWSize+marginW+4,-tileHSize-10,0)
-	local tile3 = createTile(tileWSize*2+marginW+8,-tileHSize-10,0)
-	local tile4 = createTile(tileWSize*3+marginW+12,-tileHSize-10,0)
+local tile = createTile(1,1,0)
+-- local tile2 = createTile(tile.x + tileW + marginLeft,1,1)
+-- local tile3 = createTile(tile2.x + tileW + marginLeft,1,0)
+-- local tile4 = createTile(tile3.x + tileW + marginLeft,1,0)
 
-	local group = display.newGroup()
-	group:insert(tile1)
-	group:insert(tile2)
-	group:insert(tile3)
-	group:insert(tile4)
-	group.enterFrame = moveTiles
+function createGroup(posY)
+	local tileGroup = display.newGroup()
+	tileGroup:insert(tile)
+	tileGroup[1].y = 100
 
-	Runtime:addEventListener("enterFrame",group)
-	return group
+
+
+	tileGroup.enterFrame = moveGroup
+	-- Runtime:addEventListener("enterFrame",tileGroup)
+	return tileGroup
 end
 
 
--- createTileGroup()
-numTiles = numTiles + 1
 
+local group = createGroup(0)
+tile.y = 300
+-- Runtime:addEventListener("enterFrame",group)
+-- local group2 = createGroup(group.y - tileH - marginBottom)
+-- local group3 = createGroup(group2.y - tileH - marginBottom)
+-- local group4 = createGroup(group3.y - tileH - marginBottom)
 
+-- Runtime:addEventListener("enterFrame",group3)
+-- Runtime:addEventListener("enterFrame",group4)
+-- local group2 = createGroup()
+-- local group3 = createGroup()
+-- group2.y = group.y + tileH + marginBottom
+-- group3.y = group2.y + tileH + marginBottom
 
--- local tile3 = createTile(tileWSize*2+marginW+1,100,0)
--- local tile4 = createTile(tileWSize*3+3,100,0)
+-- group3[1]:toBack()
