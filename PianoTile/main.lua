@@ -1,8 +1,9 @@
 display.setStatusBar(display.HiddenStatusBar)
 
 local numColumns, numRows, marginBottom, marginLeft = 4 , 3 , 2 , 3
+local height = display.contentHeight
 local tileW = display.contentWidth / numColumns - marginLeft
-local tileH = display.contentHeight / numRows - marginBottom
+local tileH = height / numRows - marginBottom
 
 local function createTile(isBlack)
 	local tile = display.newRect(1,0,tileW,tileH)
@@ -21,12 +22,21 @@ local tPrevious = system.getTimer()
 function moveGroup(target)
 	local group = target
 	local tDelta = ( system.getTimer() - tPrevious ) * 0.0001
+	local posY = group.y + tDelta
+	local diff = posY - height
+
 	group:translate( group.x , tDelta)
 
-	if (group.y >= display.contentHeight) then
+	if (diff > 0) then
 		display.remove(group)
 		Runtime:removeEventListener("enterFrame",group)
-		group = createGroup(- tileH - marginBottom)
+
+		local posGroup = - tileH - marginBottom
+		if (diff > 1) then
+			posGroup = posGroup + diff
+		end
+
+		group = createGroup(posGroup)
 	end
 end
 
